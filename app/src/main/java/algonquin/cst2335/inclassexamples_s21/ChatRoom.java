@@ -15,7 +15,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import com.google.android.material.snackbar.Snackbar;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 //import in the manifest
 public class ChatRoom extends AppCompatActivity {
@@ -59,6 +64,7 @@ public class ChatRoom extends AppCompatActivity {
     private class MyRowViews extends RecyclerView.ViewHolder{
         //this should the Widgets on a row , only have a TextView for message
         TextView rowMessage;
+        TextView timeText;
 
         public MyRowViews(View itemView) { //itemView is a ConstraintLayout, that has <TextView> as sub-item
             super(itemView);
@@ -72,7 +78,9 @@ public class ChatRoom extends AppCompatActivity {
                             int row = getAbsoluteAdapterPosition();
                              messages.remove(row);//which message do you delete?
                           //update list view:
-                            adt.notifyItemRemoved(row); })
+                            adt.notifyItemRemoved(row);
+                    Snackbar.make(rowMessage, "You deleted message #" + row, Snackbar.LENGTH_LONG).show();
+                })
                         .setNegativeButton("No", (dlg, clic) -> {  })
                         .create()
                         .show();
@@ -80,15 +88,30 @@ public class ChatRoom extends AppCompatActivity {
             });
 
             rowMessage = itemView.findViewById(R.id.message);
+            timeText = itemView.findViewById(R.id.time);
         }
     }
 
     private class ChatAdapter extends RecyclerView.Adapter{
 
         @Override
+        public int getItemViewType(int position) {
+        ChatMessage thisRow = messages.get(position);
+
+            return super.getItemViewType(position);
+        }
+
+        @Override
         public RecyclerView.ViewHolder onCreateViewHolder( ViewGroup parent, int viewType) {
+
+
             LayoutInflater inflater = getLayoutInflater(); //LayoutInflater is for loading XML layouts
-            View constraintLayout =  inflater.inflate(R.layout.sent_message, parent, false);//parent is for how much room does it have?
+            int layoutID;
+            if(viewType == 0)
+                layoutID = R.layout.sent_message;
+            else
+                layoutID = R.layout.receive_message;
+            View constraintLayout =  inflater.inflate(layoutID, parent, false);//parent is for how much room does it have?
 
             return new MyRowViews(  constraintLayout  ); //will initialize the TextView
         }
@@ -97,7 +120,8 @@ public class ChatRoom extends AppCompatActivity {
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) { //position is which row we're building
 
             MyRowViews thisRowLayout = (MyRowViews)holder;
-            thisRowLayout.rowMessage.setText( "This is row "+ position );//sets the text on the row
+            thisRowLayout.rowMessage.setText( messages.get(position).getMessage() );//sets the text on the row
+            thisRowLayout.timeText.setText( messages.get(position).getTimeSent() );
             //set the date text:
         }
 
@@ -111,7 +135,8 @@ public class ChatRoom extends AppCompatActivity {
         public String message;
         public int sendOrReceive;
         public String timeSent;
-
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd-MMM-yyyy hh-mm-ss a", Locale.getDefault());
+        String currentDateandTime = sdf.format(new Date());
         public ChatMessage (String s)
         {
             message = s;
@@ -132,7 +157,7 @@ public class ChatRoom extends AppCompatActivity {
         }
 
         public String getTimeSent() {
-            return timeSent;
+            return currentDateandTime;
         }
     }
 
