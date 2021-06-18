@@ -26,7 +26,8 @@ import java.util.Locale;
 public class ChatRoom extends AppCompatActivity {
 
     ArrayList<ChatMessage> messages = new ArrayList<>();//hold our typed messages
-    ChatAdapter adt  ;
+    ChatAdapter adt;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,30 +39,42 @@ public class ChatRoom extends AppCompatActivity {
         EditText messageTyped = findViewById(R.id.messageEdit);
         Button send = findViewById(R.id.sendbutton);
         RecyclerView chatList = findViewById(R.id.myrecycler);
+        Button returns = findViewById(R.id.receive);
 
 
         //add an adapter object to the RecyclerView
-       adt = new ChatAdapter() ;
+        adt = new ChatAdapter();
 
         //     build the list:
         chatList.setAdapter(adt); //need onCreateView, onBindView, getCount
         //   StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
-      LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         chatList.setLayoutManager(layoutManager);
 
 
-        send.setOnClickListener( click -> {
-                    ChatMessage nextMessage = new ChatMessage( messageTyped.getText().toString()  );
+        send.setOnClickListener(click -> {
+                    ChatMessage nextMessage = new ChatMessage(messageTyped.getText().toString());
                     messages.add(nextMessage);//adds to array list
                     //clear the edittext:
                     messageTyped.setText("");
                     //refresh the list:
-                    adt.notifyItemInserted( messages.size() - 1 ); //just insert the new row:
+                    adt.notifyItemInserted(messages.size() - 1); //just insert the new row:
                 }
         );
+        returns.setOnClickListener(click -> {
+                    ChatMessage nextMessage = new ChatMessage(messageTyped.getText().toString());
+                    messages.add(nextMessage);//adds to array list
+                    //clear the edittext:
+                    messageTyped.setText("");
+                    //refresh the list:
+                    adt.notifyItemInserted(messages.size() - 1); //just insert the new row:
+                }
+        );
+
+
     }
 
-    private class MyRowViews extends RecyclerView.ViewHolder{
+    private class MyRowViews extends RecyclerView.ViewHolder {
         //this should the Widgets on a row , only have a TextView for message
         TextView rowMessage;
         TextView timeText;
@@ -69,19 +82,20 @@ public class ChatRoom extends AppCompatActivity {
         public MyRowViews(View itemView) { //itemView is a ConstraintLayout, that has <TextView> as sub-item
             super(itemView);
 
-            itemView.setOnClickListener(  clik ->
+            itemView.setOnClickListener(clik ->
             {
-                AlertDialog.Builder builder = new AlertDialog.Builder( ChatRoom.this );
-                builder.setMessage( "Do you want to delete this?" )
+                AlertDialog.Builder builder = new AlertDialog.Builder(ChatRoom.this);
+                builder.setMessage("Do you want to delete this?")
                         .setTitle("Title").setPositiveButton("Yes", (dlg, clic) -> {
 
-                            int row = getAbsoluteAdapterPosition();
-                             messages.remove(row);//which message do you delete?
-                          //update list view:
-                            adt.notifyItemRemoved(row);
+                    int row = getAbsoluteAdapterPosition();
+                    messages.remove(row);//which message do you delete?
+                    //update list view:
+                    adt.notifyItemRemoved(row);
                     Snackbar.make(rowMessage, "You deleted message #" + row, Snackbar.LENGTH_LONG).show();
                 })
-                        .setNegativeButton("No", (dlg, clic) -> {  })
+                        .setNegativeButton("No", (dlg, clic) -> {
+                        })
                         .create()
                         .show();
 
@@ -92,42 +106,46 @@ public class ChatRoom extends AppCompatActivity {
         }
     }
 
-    private class ChatAdapter extends RecyclerView.Adapter{
+    private class ChatAdapter extends RecyclerView.Adapter {
 
         @Override
         public int getItemViewType(int position) {
-        ChatMessage thisRow = messages.get(position);
+            ChatMessage thisRow = messages.get(position);
+            //if (thisRow.getSendOrReceive() == 0) {
+                //sent message
 
-            return super.getItemViewType(position);
+            //}
+            //return super.getItemViewType(position);
+            return thisRow.getSendOrReceive();
         }
 
         @Override
-        public RecyclerView.ViewHolder onCreateViewHolder( ViewGroup parent, int viewType) {
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
 
             LayoutInflater inflater = getLayoutInflater(); //LayoutInflater is for loading XML layouts
             int layoutID;
-            if(viewType == 0)
+            if (viewType == 1)
                 layoutID = R.layout.sent_message;
             else
                 layoutID = R.layout.receive_message;
-            View constraintLayout =  inflater.inflate(layoutID, parent, false);//parent is for how much room does it have?
+            View constraintLayout = inflater.inflate(layoutID, parent, false);//parent is for how much room does it have?
 
-            return new MyRowViews(  constraintLayout  ); //will initialize the TextView
+            return new MyRowViews(constraintLayout); //will initialize the TextView
         }
 
         @Override               //says ViewHolder, but it's acually MyRowViews object
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) { //position is which row we're building
 
-            MyRowViews thisRowLayout = (MyRowViews)holder;
-            thisRowLayout.rowMessage.setText( messages.get(position).getMessage() );//sets the text on the row
-            thisRowLayout.timeText.setText( messages.get(position).getTimeSent() );
+            MyRowViews thisRowLayout = (MyRowViews) holder;
+            thisRowLayout.rowMessage.setText(messages.get(position).getMessage());//sets the text on the row
+            thisRowLayout.timeText.setText(messages.get(position).getTimeSent());
             //set the date text:
         }
 
         @Override
         public int getItemCount() {
-            return  messages.size(); //how many items to show?
+            return messages.size(); //how many items to show?
         }
     }
 
@@ -137,8 +155,8 @@ public class ChatRoom extends AppCompatActivity {
         public String timeSent;
         SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd-MMM-yyyy hh-mm-ss a", Locale.getDefault());
         String currentDateandTime = sdf.format(new Date());
-        public ChatMessage (String s)
-        {
+
+        public ChatMessage(String s) {
             message = s;
         }
 
