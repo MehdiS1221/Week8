@@ -51,9 +51,12 @@ public class ChatRoom extends AppCompatActivity {
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         chatList.setLayoutManager(layoutManager);
 
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd-MMM-yyyy hh-mm-ss a", Locale.getDefault());
+        String currentDateandTime = sdf.format(new Date());
+
 
         send.setOnClickListener(click -> {
-                    ChatMessage nextMessage = new ChatMessage(messageTyped.getText().toString());
+                    ChatMessage nextMessage = new ChatMessage(messageTyped.getText().toString(), 1, currentDateandTime);
                     messages.add(nextMessage);//adds to array list
                     //clear the edittext:
                     messageTyped.setText("");
@@ -62,7 +65,7 @@ public class ChatRoom extends AppCompatActivity {
                 }
         );
         returns.setOnClickListener(click -> {
-                    ChatMessage nextMessage = new ChatMessage(messageTyped.getText().toString());
+                    ChatMessage nextMessage = new ChatMessage(messageTyped.getText().toString(), 0 , currentDateandTime);
                     messages.add(nextMessage);//adds to array list
                     //clear the edittext:
                     messageTyped.setText("");
@@ -156,9 +159,9 @@ public class ChatRoom extends AppCompatActivity {
         SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd-MMM-yyyy hh-mm-ss a", Locale.getDefault());
         String currentDateandTime = sdf.format(new Date());
 
-        public ChatMessage(String s) {
-            message = s;
-        }
+//        public ChatMessage(String s) {
+//            message = s;
+//        }
 
         public ChatMessage(String message, int sendOrReceive, String timeSent) {
             this.message = message;
