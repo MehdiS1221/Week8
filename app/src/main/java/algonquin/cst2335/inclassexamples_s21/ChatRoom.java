@@ -25,6 +25,7 @@ import java.util.Locale;
 //import in the manifest
 public class ChatRoom extends AppCompatActivity {
 
+
     ArrayList<ChatMessage> messages = new ArrayList<>();//hold our typed messages
     ChatAdapter adt;
 
@@ -35,7 +36,7 @@ public class ChatRoom extends AppCompatActivity {
         //load a layout:
         setContentView(R.layout.chatlayout);
 
-
+        MyOpenHelper opener = new MyOpenHelper();
         EditText messageTyped = findViewById(R.id.messageEdit);
         Button send = findViewById(R.id.sendbutton);
         RecyclerView chatList = findViewById(R.id.myrecycler);
