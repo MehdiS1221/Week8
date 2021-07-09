@@ -29,8 +29,11 @@ import java.util.Locale;
 public class ChatRoom extends AppCompatActivity {
 
 
+
     ArrayList<ChatMessage> messages = new ArrayList<>();//hold our typed messages
     ChatAdapter adt;
+    SQLiteDatabase db;
+    ChatMessage removedMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +43,7 @@ public class ChatRoom extends AppCompatActivity {
         setContentView(R.layout.chatlayout);
 
         MyOpenHelper opener = new MyOpenHelper(this);
-        SQLiteDatabase db = opener.getWritableDatabase();
+        db = opener.getWritableDatabase();
 
         Cursor results = db.rawQuery("Select * from " + MyOpenHelper.TABLE_NAME + ";", null);
 
@@ -117,6 +120,7 @@ public class ChatRoom extends AppCompatActivity {
 
     }
 
+
     private class MyRowViews extends RecyclerView.ViewHolder {
         //this should the Widgets on a row , only have a TextView for message
         TextView rowMessage;
@@ -127,14 +131,32 @@ public class ChatRoom extends AppCompatActivity {
 
             itemView.setOnClickListener(clik ->
             {
+                int row = getAbsoluteAdapterPosition();
+
+//                ChatMessage removedMessage = messages.get(row);
+//                messages.remove(row);
+//                adt.notifyItemRemoved(row);
+//
+//
+//                db.delete(MyOpenHelper.TABLE_NAME, "_id=?", new String[] { Long.toString( removedMessage.getId() )});
+
+
                 AlertDialog.Builder builder = new AlertDialog.Builder(ChatRoom.this);
                 builder.setMessage("Do you want to delete this?")
                         .setTitle("Title").setPositiveButton("Yes", (dlg, clic) -> {
 
-                    int row = getAbsoluteAdapterPosition();
-                    messages.remove(row);//which message do you delete?
-                    //update list view:
-                    adt.notifyItemRemoved(row);
+                            removedMessage = messages.get(row);
+                messages.remove(row);
+                adt.notifyItemRemoved(row);
+
+
+                db.delete(MyOpenHelper.TABLE_NAME, "_id=?", new String[] { Long.toString( removedMessage.getId() )});
+
+
+//
+//                    messages.remove(row);//which message do you delete?
+//                    //update list view:
+//                    adt.notifyItemRemoved(row);
                     Snackbar.make(rowMessage, "You deleted message #" + row, Snackbar.LENGTH_LONG).show();
                 })
                         .setNegativeButton("No", (dlg, clic) -> {
@@ -144,11 +166,21 @@ public class ChatRoom extends AppCompatActivity {
 
             });
 
+
             rowMessage = itemView.findViewById(R.id.message);
             timeText = itemView.findViewById(R.id.time);
         }
     }
+    //
+    @Override
+    public void onBackPressed() {
 
+        db.execSQL("Insert into " + MyOpenHelper.TABLE_NAME + " values('" + removedMessage.getId() +
+                "','" + removedMessage.getMessage() +
+                "','" + removedMessage.getSendOrReceive() +
+                "','" + removedMessage.getTimeSent()+ "');");
+//        super.onBackPressed();
+    }
     private class ChatAdapter extends RecyclerView.Adapter {
 
         @Override
@@ -217,6 +249,11 @@ public class ChatRoom extends AppCompatActivity {
 
 
         }
+
+        public long getId() {
+            return id;
+        }
+
         public void setId(long l){ id = l;}
         public String getMessage() {
             return message;
